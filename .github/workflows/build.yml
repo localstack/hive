@@ -1,12 +1,10 @@
 name: Build Hive
-
 on:
   push:
-    branches: [ branch-3.1.patch ]
+    branches: [ branch-3.1.patch, branch-2.3.patch ]
   pull_request:
-    branches: [ branch-3.1.patch ]
+    branches: [ branch-3.1.patch, branch-2.3.patch ]
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -31,15 +29,21 @@ jobs:
         restore-keys: ${{ runner.os }}-m2
     
     - name: Build with Maven
-      run: mvn -B clean install -DskipTests
-
-    - name: Archive build artifacts
-      uses: actions/upload-artifact@v3
+      run: mvn clean package -Pdist -DskipTests
+    
+    - name: Generate SHA256 checksum
+      run: |
+        cd packaging/target
+        sha256sum apache-hive-3.1.3-bin.tar.gz > apache-hive-3.1.3-bin.tar.gz.sha256
+    
+    - name: Upload to Release
+      if: github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
       with:
-        name: hive-artifacts
-        path: |
-          **/target/*.jar
-          !**/target/*-sources.jar
-          !**/target/*-javadoc.jar
-          !**/target/test-classes/**
-          !**/target/classes/**
+        tag_name: 3.1.3
+        files: |
+          packaging/target/apache-hive-3.1.3-bin.tar.gz
+          packaging/target/apache-hive-3.1.3-bin.tar.gz.sha256
+        draft: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
