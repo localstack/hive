@@ -209,6 +209,10 @@
   <repositories>
    <!-- This needs to be removed before checking in-->
     <repository>
+      <id>huawei-maven</id>
+      <url>https://repo.huaweicloud.com/repository/maven/huaweicloudsdk/</url>
+    </repository>
+    <repository>
       <id>datanucleus</id>
       <name>datanucleus maven repository</name>
       <url>http://www.datanucleus.org/downloads/maven2</url>

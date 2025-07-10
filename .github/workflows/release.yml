@@ -1,0 +1,48 @@
+name: Build Hive
+on:
+  push:
+    branches: [ branch-3.1.patch, branch-2.3.4.patch ]
+  pull_request:
+    branches: [ branch-3.1.patch, branch-2.3.4.patch ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    
+    - name: Set up JDK 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    
+    - name: Build with Maven
+      run: mvn clean package -Pdist -DskipTests
+    
+    - name: Generate SHA256 checksum
+      run: |
+        cd packaging/target
+        sha256sum apache-hive-2.3.4-bin.tar.gz > apache-hive-2.3.4-bin.tar.gz.sha256
+    
+    - name: Upload to Release
+      if: github.event_name == 'push'
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: hive-2.3.4-patched
+        files: |
+          packaging/target/apache-hive-2.3.4-bin.tar.gz
+          packaging/target/apache-hive-2.3.4-bin.tar.gz.sha256
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
