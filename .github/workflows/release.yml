@@ -40,7 +40,7 @@ jobs:
       if: github.event_name == 'push'
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: hive-2.3.4-patched
+        tag_name: 2.3.4
         files: |
           packaging/target/apache-hive-2.3.4-bin.tar.gz
           packaging/target/apache-hive-2.3.4-bin.tar.gz.sha256
