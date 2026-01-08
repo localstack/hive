@@ -185,11 +185,6 @@ public class HiveSessionImpl implements HiveSession {
       LOG.error(msg, e);
       throw new HiveSQLException(msg, e);
     }
-    try {
-      sessionHive = Hive.get(getHiveConf());
-    } catch (HiveException e) {
-      throw new HiveSQLException("Failed to get metastore connection", e);
-    }
     // Process global init file: .hiverc
     processGlobalInitFile();
     // Set fetch size in session conf map
@@ -197,6 +192,12 @@ public class HiveSessionImpl implements HiveSession {
 
     if (sessionConfMap != null) {
       configureSession(sessionConfMap);
+    }
+
+    try {
+      sessionHive = Hive.get(getHiveConf());
+    } catch (HiveException e) {
+      throw new HiveSQLException("Failed to get metastore connection", e);
     }
     lastAccessTime = System.currentTimeMillis();
   }
